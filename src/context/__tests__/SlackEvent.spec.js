@@ -541,6 +541,21 @@ const interactiveMessageEvent = {
   trigger_id: '274927463524.5223114719.95a5b9f6d3b30dc7e07dec6bfa4610e5',
 };
 
+const slashCommandMessageEvent = {
+  token: 'xxxxxxxxxxxxxxxxxxxxxxxx',
+  team_id: 'T056K0000',
+  team_domain: 'domain',
+  channel_id: 'G7W5W0000',
+  channel_name: 'channel_name',
+  user_id: 'U056K0000',
+  user_name: 'user_name',
+  command: '/command',
+  text: 'arguments',
+  response_url:
+    'https://hooks.slack.com/commands/T056K0000/300680000000/xxxxxxxxxxxxxxxxxxxxxxxx',
+  trigger_id: '300680200000.5223100000.e4f5ce4d607d59005675000000000000',
+};
+
 it('#rawEvent', () => {
   expect(new SlackEvent(message).rawEvent).toEqual(message);
 });
@@ -738,17 +753,20 @@ it('#isMessage', () => {
   expect(new SlackEvent(imMessage).isMessage).toEqual(true);
   expect(new SlackEvent(mpimMessage).isMessage).toEqual(true);
   expect(new SlackEvent(interactiveMessageEvent).isMessage).toEqual(false);
+  expect(new SlackEvent(slashCommandMessageEvent).isMessage).toEqual(false);
 });
 
 it('#isText', () => {
   const event = new SlackEvent(message);
   expect(event.isText).toEqual(true);
   expect(new SlackEvent(interactiveMessageEvent).isText).toEqual(false);
+  expect(new SlackEvent(slashCommandMessageEvent).isText).toEqual(true);
 });
 
 it('#text', () => {
   expect(new SlackEvent(message).text).toEqual('Hello world');
   expect(new SlackEvent(interactiveMessageEvent).text).toEqual(null);
+  expect(new SlackEvent(slashCommandMessageEvent).text).toEqual('arguments');
 });
 
 it('#message', () => {
@@ -759,8 +777,9 @@ it('#message', () => {
     type: 'message',
     user: 'U2147483697',
   });
-  expect(new SlackEvent({ type: 'notMessage' }).message).toEqual(undefined);
-  expect(new SlackEvent(interactiveMessageEvent).message).toEqual(undefined);
+  expect(new SlackEvent({ type: 'notMessage' }).message).toEqual(null);
+  expect(new SlackEvent(interactiveMessageEvent).message).toEqual(null);
+  expect(new SlackEvent(slashCommandMessageEvent).message).toEqual(null);
 });
 
 it('#isChannelsMessage', () => {
@@ -892,5 +911,21 @@ describe('interactive message event', () => {
       value: 'chess',
     });
     expect(new SlackEvent(message).action).toEqual(null);
+  });
+});
+
+describe('slash command event', () => {
+  it('#isSlashCommand', () => {
+    expect(new SlackEvent(slashCommandMessageEvent).isSlashCommand).toEqual(
+      true
+    );
+    expect(new SlackEvent(message).isSlashCommand).toEqual(false);
+  });
+
+  it('#slashCommand', () => {
+    expect(new SlackEvent(slashCommandMessageEvent).slashCommand).toEqual(
+      '/command'
+    );
+    expect(new SlackEvent(message).slashCommand).toEqual(null);
   });
 });

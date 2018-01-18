@@ -95,7 +95,24 @@ export type InteractiveMessageEvent = {
   thread_ts?: string,
 };
 
-export type SlackRawEvent = Message | InteractiveMessageEvent;
+export type SlashCommandEvent = {
+  token: string,
+  team_id: string,
+  team_domain: string,
+  channel_id: string,
+  channel_name: string,
+  user_id: string,
+  user_name: string,
+  command: string,
+  text: string,
+  response_url: string,
+  trigger_id: string,
+};
+
+export type SlackRawEvent =
+  | Message
+  | InteractiveMessageEvent
+  | SlashCommandEvent;
 
 export default class SlackEvent implements Event {
   _rawEvent: SlackRawEvent;
@@ -117,7 +134,10 @@ export default class SlackEvent implements Event {
    *
    */
   get isMessage(): boolean {
-    return this._rawEvent.type === 'message';
+    return (
+      ((this._rawEvent: any): Message | InteractiveMessageEvent).type ===
+      'message'
+    );
   }
 
   /**
@@ -173,7 +193,7 @@ export default class SlackEvent implements Event {
    *
    */
   get message(): ?Message {
-    if (!this.isMessage) return;
+    if (!this.isMessage) return null;
 
     const message = ((this._rawEvent: any): Message);
 
@@ -185,7 +205,7 @@ export default class SlackEvent implements Event {
    *
    */
   get isText(): boolean {
-    return this.isMessage;
+    return !!((this._rawEvent: any): Message | SlashCommandEvent).text;
   }
 
   /**
@@ -194,7 +214,7 @@ export default class SlackEvent implements Event {
    */
   get text(): ?string {
     if (this.isText) {
-      return ((this.message: any): Message).text;
+      return ((this._rawEvent: any): Message | SlashCommandEvent).text;
     }
     return null;
   }
@@ -204,7 +224,10 @@ export default class SlackEvent implements Event {
    *
    */
   get isInteractiveMessage(): boolean {
-    return this._rawEvent.type === 'interactive_message';
+    return (
+      ((this._rawEvent: any): Message | InteractiveMessageEvent).type ===
+      'interactive_message'
+    );
   }
 
   /**
@@ -227,6 +250,22 @@ export default class SlackEvent implements Event {
       return ((this._rawEvent: any): InteractiveMessageEvent).actions[0];
     }
     return null;
+  }
+
+  /**
+   * Determine if the event is a slash command event.
+   *
+   */
+  get isSlashCommand(): boolean {
+    return !!((this._rawEvent: any): SlashCommandEvent).command;
+  }
+
+  /**
+   * The slash command name.
+   *
+   */
+  get slashCommand(): ?string {
+    return ((this._rawEvent: any): SlashCommandEvent).command || null;
   }
 }
 

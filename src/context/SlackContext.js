@@ -8,6 +8,7 @@ import type { Session } from '../session/Session';
 
 import Context from './Context';
 import SlackEvent from './SlackEvent';
+import type { Message } from './SlackEvent';
 import type { PlatformContext } from './PlatformContext';
 
 type Options = {|
@@ -66,7 +67,7 @@ export default class SlackContext extends Context implements PlatformContext {
     this._isHandled = true;
 
     return this._client.postMessage(channelId, message, {
-      thread_ts: this._event.rawEvent.thread_ts,
+      thread_ts: ((this._event.rawEvent: any): Message).thread_ts,
       ...options,
     });
   }
