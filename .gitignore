@@ -5,3 +5,4 @@ yarn-error.log
 coverage
 junit.xml
 lib
+lib-node6
