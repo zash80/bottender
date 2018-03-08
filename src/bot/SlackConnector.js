@@ -200,7 +200,7 @@ export default class SlackConnector implements Connector<SlackRequestBody> {
     const rawEvent = this._getRawEventFromRequest(body);
 
     if (this._isBotEventRequest(body)) {
-      return []; // FIXME
+      return [new SlackEvent(rawEvent)];
     }
 
     return [new SlackEvent(rawEvent)];
